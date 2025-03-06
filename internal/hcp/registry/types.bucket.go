@@ -72,13 +72,12 @@ func (bucket *Bucket) Validate() error {
 	return nil
 }
 
-// ReadFromHCLBuildBlock reads the information for initialising a Bucket from a HCL2 build block
-func (bucket *Bucket) ReadFromHCLBuildBlock(build *hcl2template.BuildBlock) {
+// ReadFromHCPPackerRegistryBlock reads the information for initialising a Bucket from a HCL2 Packer registry block
+func (bucket *Bucket) ReadFromHCPPackerRegistryBlock(registryBlock *hcl2template.HCPPackerRegistryBlock) {
 	if bucket == nil {
 		return
 	}
 
-	registryBlock := build.HCPPackerRegistry
 	if registryBlock == nil {
 		return
 	}

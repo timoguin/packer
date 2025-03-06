@@ -669,6 +669,18 @@ func (cfg *PackerConfig) GetHCPPackerRegistryBlock() (*HCPPackerRegistryBlock, h
 				continue
 			}
 			block = build.HCPPackerRegistry
+
+			// trying to add a bit more context in case the block has empty field since
+			// we have a parent build block
+
+			if block.Description == "" && build.Description != "" {
+				block.Description = build.Description
+			}
+
+			if block.Slug == "" && build.Name != "" {
+				block.Slug = build.Name
+			}
+
 			diags = diags.Append(&hcl.Diagnostic{
 				Summary:  "Build block level " + buildHCPPackerRegistryLabel + " are deprecated",
 				Subject:  &block.DefRange,

@@ -106,19 +106,15 @@ func NewHCLRegistry(config *hcl2template.PackerConfig, ui sdkpacker.Ui) (*HCLReg
 		return nil, diags
 	}
 
-	withHCLBucketConfiguration := func(bb *hcl2template.BuildBlock) bucketConfigurationOpts {
-		return func(bucket *Bucket) hcl.Diagnostics {
-			bucket.ReadFromHCLBuildBlock(bb)
-			// If at this point the bucket.Name is still empty,
-			// last try is to use the build.Name if present
-			if bucket.Name == "" && bb.Name != "" {
-				bucket.Name = bb.Name
-			}
+	registryConfig, rcDiags := config.GetHCPPackerRegistryBlock()
+	diags = diags.Extend(rcDiags)
+	if diags.HasErrors() {
+		return nil, diags
+	}
 
-			// If the description is empty, use the one from the build block
-			if bucket.Description == "" && bb.Description != "" {
-				bucket.Description = bb.Description
-			}
+	withHCLBucketConfiguration := func(registryBlock *hcl2template.HCPPackerRegistryBlock) bucketConfigurationOpts {
+		return func(bucket *Bucket) hcl.Diagnostics {
+			bucket.ReadFromHCPPackerRegistryBlock(registryBlock)
 			return nil
 		}
 	}
@@ -129,11 +125,10 @@ func NewHCLRegistry(config *hcl2template.PackerConfig, ui sdkpacker.Ui) (*HCLReg
 		diags = append(diags, dsDiags...)
 	}
 
-	build := config.Builds[0]
 	bucket, bucketDiags := createConfiguredBucket(
 		config.Basedir,
 		withPackerEnvConfiguration,
-		withHCLBucketConfiguration(build),
+		withHCLBucketConfiguration(registryConfig),
 		withDeprecatedDatasourceConfiguration(vals, ui),
 		withDatasourceConfiguration(vals),
 	)
